@@ -11,9 +11,9 @@ const router = express.Router();
 
 //Get Posts
 
-router.get('/', (req, res) => {
+router.get('/:artist', (req, res) => {
     res.set('Content-Type', 'text/html');
-    var resultsHTML = searchAlbum('beyonce')
+    var resultsHTML = searchAlbum(req.params.artist)
     .then(data => res.json(data));
     //const responseJson =  JSON.parse(resultsHTML);
     //resultsHTML.toString()
@@ -40,6 +40,7 @@ function searchAlbum(artist) {
             json: true,
             form: {
                 term: artist,
+                entity: 'album',
                 media: 'music',
                 limit: 200
             }
@@ -50,18 +51,20 @@ function searchAlbum(artist) {
                 console.log(`Status: ${res.statusCode}`);
                 //console.log(body['results']);
                 var albums = [];
-                body['results'].forEach( (item,  index) =>  {
-                    console.log(index);
-                    if ( albums.includes(item.collectionName) ) {
-                        delete body['results'][index];
-
+                //Loop is backwards because splice rearanges the indexes
+                for (var i = body['results'].length - 1; i >= 0; i--) {
+                    if ( albums.includes(body['results'][i].collectionName) ) {
+                        body['results'].splice(i,1);
                     }else{
-                        albums.push(item.collectionName);
+
+                        albums.push(body['results'][i].collectionName);
+
                     }
-                });
+                } 
+                
                 //const responseJson = JSON.parse(body);
 
-                resolve(body['results']);
+                resolve(body);
             }else{
                 reject(err);
             }
@@ -75,3 +78,50 @@ function searchAlbum(artist) {
    
 
 module.exports = router;
+
+
+exports.inviteUser = function(req, res) {
+    var invitationBody = req.body;
+    var shopId = req.params.shopId;
+    var authUrl = "https://url.to.auth.system.com/invitation";
+  
+    superagent
+      .post(authUrl)
+      .send(invitationBody)
+      .end(function(err, invitationResponse) {
+        if (invitationResponse.status === 201) {
+          User.findOneAndUpdate({
+            authId: invitationResponse.body.authId
+          }, {
+            authId: invitationResponse.body.authId,
+            email: invitationBody.email
+          }, {
+            upsert: true,
+            new: true
+          }, function(err, createdUser) {
+            Shop.findById(shopId).exec(function(err, shop) {
+              if (err || !shop) {
+                return res.status(500).send(err || { message: 'No shop found' });
+              }
+              if (shop.invitations.indexOf(invitationResponse.body.invitationId) === -1 ) {
+                shop.invitations.push(invitationResponse.body.invitationId);
+              }
+              if (shop.users.indexOf(createdUser._id) === -1) {
+                shop.users.push(createdUser);
+              }
+              shop.save();
+            });
+          });
+          res.json(invitationResponse);
+          
+        } else if (invitationResponse.status === 200) {
+          res.status(400).json({
+            error: true,
+            message: 'User already invited to this shop'
+          });
+          return;
+        }
+       
+      });
+  };
+  
