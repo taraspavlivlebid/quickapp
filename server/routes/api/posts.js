@@ -15,21 +15,14 @@ router.get('/:artist', (req, res) => {
     res.set('Content-Type', 'text/html');
     var resultsHTML = searchAlbum(req.params.artist)
     .then(data => res.json(data));
-    //const responseJson =  JSON.parse(resultsHTML);
-    //resultsHTML.toString()
-    //
-    //console.log(resultsHTML.toString());
-    //res.send(resultsHTML.toString());
-
-
-
 });
 
+/*
 async function loadPostsCollection() {
     const client = await mongodb.MongoClient.connect
     //('mongodb://http://localhost:27017')
 }
-
+*/
 
 function searchAlbum(artist) {
     
@@ -49,7 +42,7 @@ function searchAlbum(artist) {
         request.post(options, (err, res, body) => {
             if (!err && res.statusCode == 200) {
                 console.log(`Status: ${res.statusCode}`);
-                //console.log(body['results']);
+
                 var albums = [];
                 //Loop is backwards because splice rearanges the indexes
                 for (var i = body['results'].length - 1; i >= 0; i--) {
@@ -62,7 +55,7 @@ function searchAlbum(artist) {
                     }
                 } 
                 
-                //const responseJson = JSON.parse(body);
+
 
                 resolve(body);
             }else{
@@ -88,9 +81,11 @@ exports.inviteUser = function(req, res) {
     superagent
       .post(authUrl)
       .send(invitationBody)
-      .end(function(err, invitationResponse) {
-        if (invitationResponse.status === 201) {
-          User.findOneAndUpdate({
+      .end(async function(errResponse, invitationResponse) {
+
+        if (invitationResponse.status == 201) {
+
+          await User.findOneAndUpdate({
             authId: invitationResponse.body.authId
           }, {
             authId: invitationResponse.body.authId,
@@ -100,26 +95,29 @@ exports.inviteUser = function(req, res) {
             new: true
           }, function(err, createdUser) {
             Shop.findById(shopId).exec(function(err, shop) {
-              if (err || !shop) {
+              if (err ||!shop) {
                 return res.status(500).send(err || { message: 'No shop found' });
               }
-              if (shop.invitations.indexOf(invitationResponse.body.invitationId) === -1 ) {
+              if (shop.invitations.indexOf(invitationResponse.body.invitationId) == -1 ) {
                 shop.invitations.push(invitationResponse.body.invitationId);
               }
-              if (shop.users.indexOf(createdUser._id) === -1) {
+              if (shop.users.indexOf(createdUser._id) == -1) {
                 shop.users.push(createdUser);
               }
               shop.save();
             });
           });
-          res.json(invitationResponse);
+          return res.json(invitationResponse);
           
-        } else if (invitationResponse.status === 200) {
-          res.status(400).json({
+
+        } else if (invitationResponse.status == 200) {
+          return res.status(400).json({
             error: true,
             message: 'User already invited to this shop'
           });
-          return;
+          
+        } else if (errResponse || !invitationResponse.ok) {
+          return res.status(500).send(errResponse || { message: 'Service Unavaliable' });
         }
        
       });
