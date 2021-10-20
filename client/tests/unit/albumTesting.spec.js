@@ -7,26 +7,27 @@ config.showDeprecationWarnings = false
 
 import TheNavbar from '@/components/TheNavbar.vue'
 import TheSearchbar from '@/components/TheSearchbar.vue'
+import AlbumList from '@/components/AlbumList.vue'
+import App from '@/App.vue'
+
 
 import Buefy from 'buefy';
 import store from '@/store.js';
 import Vuex from 'vuex';
 import vueMoment from 'vue-moment'
-import VueMq from 'vue-mq'
-import VuejsDialog from 'vuejs-dialog'
 
 const localVue = createLocalVue();
 localVue.use(Buefy);
 localVue.use(vueMoment);
 
-/*
+
 localVue.use(Vuex)
 
-*/
+
 
 describe('rendering', () => {
     
-    const wrapper = shallowMount(TheNavbar, {
+    const wrapperNavBar = mount(TheNavbar, {
         propsData: {
             showRecentSearchBox: false,
             recentSearch: [],
@@ -35,16 +36,9 @@ describe('rendering', () => {
             //isMobile: false,
             settings: { initialSearchQuery: 'eminem', searchQuery: '', panelType: 'card', bookmarkIcon: 'fa-star', perPage: '20', youtubeLink: 'false' }
         }
-    })
-    test('renders correctly', ()=> {
-        expect(wrapper.props().isMobile).toBe(false)
-    })
-    
-});
+    });
 
-describe('searchbar', () => {
-    
-    const wrapper = shallowMount(TheSearchbar, {
+    const wrapperSearch = shallowMount(TheSearchbar, {
         localVue,
         propsData: {
             recentSearch: [],
@@ -52,11 +46,35 @@ describe('searchbar', () => {
             settings: { initialSearchQuery: 'eminem', searchQuery: '', panelType: 'card', bookmarkIcon: 'fa-star', perPage: '20', youtubeLink: 'false' }
         }
     });
-    console.log(wrapper.html())
-    //wrapper.findAll('input').at(0).setValue('test32');
+    test('renders NavBar correctly1', ()=> {
+        expect(wrapperNavBar.props().isMobile).toBe(false)
+        expect(wrapperNavBar.html()).toContain('Search iTunes APP')
+    });
+    test('renders search correctly1', ()=> {
+        expect(wrapperSearch.html()).toContain('eminem')
+    });
 
 
-    test('renders correctly', ()=> {
-        expect(wrapper.html()).toContain('eminem')
-    }) 
+
+    
+});
+
+describe('app', () => {
+    
+    const wrapper = shallowMount(App, {
+        localVue,
+        store,
+    });
+
+    test('store loads', ()=> {
+        expect(wrapper.isVueInstance()).toStrictEqual(true);
+    });
+
+
+    test('store loads correct values', ()=> {
+        expect(wrapper.vm.isAlbumLoading).toBeFalsy()
+        expect(wrapper.vm.isAlbumTracksLoading).toBeFalsy()
+        
+    });
+
 })
