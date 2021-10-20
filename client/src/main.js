@@ -4,6 +4,7 @@ import store from './store'
 import Buefy from 'buefy'
 import vueMoment from 'vue-moment'
 import VueMq from 'vue-mq'
+import VuejsDialog from 'vuejs-dialog'
 
 Vue.use(Buefy)
 Vue.use(vueMoment)
@@ -14,7 +15,9 @@ Vue.use(VueMq, {
     laptop: 1250
   }
 })
-
+Vue.use(VuejsDialog, {
+  message: 'Please confirm action'
+})
 Vue.config.productionTip = false
 
 new Vue({

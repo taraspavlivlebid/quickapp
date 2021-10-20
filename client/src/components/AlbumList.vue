@@ -1,11 +1,11 @@
 <template>
     <section class="section">
-      <div class="container" style="margin-top:0px;">
+      <div class="container" style="margin-top:50px;">
         <div class="columns is-multiline is-mobile" v-if="!isAlbumLoading && albums.length > 0">
           <div class="column is-6" >
             <span class="is-size-5-desktop is-size-6-mobile has-text-grey" v-if="pageType !== 'bookmarks'"> Search Results </span>
             <span class="is-size-5-desktop is-size-6-mobile has-text-grey" v-else> Bookmarks</span></div>
-          <div class="column is-5 has-text-right "><span class="has-text-grey-light is-size-6"> {{albums.length}} album(s) </span> </div>
+          <div class="column is-5 has-text-right "><span class="has-text-grey-light is-size-6"> {{filteredalgumSize()}} album(s) </span> </div>
           <div class="column is-1 has-text-left">
               <b-tooltip type="is-light" label="switch panel view" position="is-top" :active="!isMobile">
               <i @click="onClickUpdateSettings" class="fas  fa-lg" :class="[settings.panelType === 'card' ? 'fa-th-list' : 'fa-th']"></i>
@@ -192,12 +192,16 @@ export default {
   },
   computed: {
     filteredalbums() {
-      console.log("asd")
-      if( this.$store.state.filteralbumsquery  !== ''){
+      if( this.$store.state.filteralbumsquery  !== '' ){
 
         return this.albums.filter((album) => {
-          return album.collectionName.toLowerCase().includes(this.$store.state.filteralbumsquery.toLowerCase());
+          if (album.collectionName != undefined ){
+            return album.collectionName.toLowerCase().includes(this.$store.state.filteralbumsquery.toLowerCase());
+          }else{
+            return true
+            }
         })
+        
       }else{
         return this.albums
       }
@@ -226,7 +230,11 @@ export default {
       if( this.$store.state.filteralbumsquery  !== ''){
 
         return this.albums.filter((album) => {
-          return album.collectionName.toLowerCase().includes(this.$store.state.filteralbumsquery.toLowerCase());
+          if (album.collectionName != undefined ){
+            return album.collectionName.toLowerCase().includes(this.$store.state.filteralbumsquery.toLowerCase());
+          }else{
+            return true
+            }
         }).length
       }else{
         return this.albums.length

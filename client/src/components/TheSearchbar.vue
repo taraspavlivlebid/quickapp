@@ -5,7 +5,6 @@
         <b-autocomplete size="is-medium"
         expanded
           v-model="searchQuery"
-          :data="filteredDataArray"
           placeholder="artist name"
           icon="magnify"
           @select="option => selected = option"

@@ -181,20 +181,13 @@ export default {
     },
     bookmarkAlbum (album) {
       if (this.isInBookmark(album.collectionCensoredName)) {
-        this.$dialog.confirm({
-          message: `Are you sure you want to unbookmark this album? <b>${album.collectionCensoredName} album</b>`,
-          type: 'is-danger',
-          hasIcon: true,
-          onConfirm: () => {
-            this.$store.dispatch('BOOKMARK_ALBUM', { 'album': album, 'status': 'unbookmarked' })
+        this.$store.dispatch('BOOKMARK_ALBUM', { 'album': album, 'status': 'unbookmarked' })
             this.$toast.open({
               duration: 3000,
               message: `"${album.collectionCensoredName} album" has been unbookmark!`,
               position: 'is-bottom-right',
               type: 'is-danger'
             })
-          }
-        })
       } else {
         this.$buefy.toast.open({
           duration: 3000,

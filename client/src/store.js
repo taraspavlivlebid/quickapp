@@ -101,7 +101,7 @@ export default new Vuex.Store({
       state.isAlbumTracksLoading = action
     },
     SET_PAGE_TYPE: (state, type) => {
-      if (type === 'bookmarks') { state.settings.searchQuery = '' }
+      if (type === 'bookmarks') { state.settings.searchQuery = ''; state.settings.filteralbumsquery = '' }
       state.pageType = type
     },
     SET_SETTINGS: (state, settings) => {
